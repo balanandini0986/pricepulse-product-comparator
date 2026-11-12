@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PricePulse Live — Real-Time Multi-Platform Product Comparator</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <div class="brand" id="brand-home" role="button" tabindex="0">
+        <span class="brand-logo">PricePulse</span>
+        <span class="brand-badge">Live Original Metrics • No API Keys</span>
+      </div>
+
+      <form id="search-form" class="search-bar">
+        <input
+          type="text"
+          id="search-input"
+          placeholder="Search any product (e.g. Maybelline Mascara, Puma Smashic, boAt Airdopes 141, iPhone 15)..."
+          autocomplete="off"
+        />
+        <button type="submit" class="btn btn-primary">Search Live</button>
+      </form>
+
+      <div class="topbar-actions">
+        <button id="refresh-btn" class="btn btn-ghost" title="Bypass short cache and fetch fresh live store pages">
+          ↻ Refresh Live
+        </button>
+      </div>
+    </div>
+
+    <div class="container category-strip" id="category-strip"></div>
+  </header>
+
+  <main class="container main-content">
+    <!-- Storefront / Search Results View -->
+    <section id="catalog-view">
+      <div class="section-header">
+        <div>
+          <h1 id="catalog-title">Featured Live Products</h1>
+          <p id="catalog-subtitle" class="muted">
+            Click any product to fetch live prices, ratings, delivery estimates, platform-specific buyer reviews, and buying analysis.
+          </p>
+        </div>
+        <div id="catalog-meta" class="meta-pill hidden"></div>
+      </div>
+
+      <div id="catalog-loading" class="loading-box hidden">
+        <div class="spinner"></div>
+        <span>Fetching original live listings from online stores...</span>
+      </div>
+
+      <div id="catalog-grid" class="product-grid"></div>
+    </section>
+
+    <!-- Product Comparison & Price Analysis View -->
+    <section id="compare-view" class="hidden">
+      <div class="compare-nav">
+        <button id="back-btn" class="btn btn-ghost">← Back to Products</button>
+        <div class="compare-controls">
+          <label for="priority-select" class="muted small">Analysis Priority:</label>
+          <select id="priority-select" class="select-input">
+            <option value="balanced">Balanced AI Verdict (Price + Reviews + Delivery)</option>
+            <option value="price">Lowest Price Focus</option>
+            <option value="rating">Best Ratings &amp; Review Volume</option>
+            <option value="delivery">Fastest Delivery &amp; Return Policy</option>
+          </select>
+          <button id="compare-refresh-btn" class="btn btn-ghost">↻ Re-fetch Live</button>
+        </div>
+      </div>
+
+      <div id="compare-loading" class="loading-box hidden">
+        <div class="spinner"></div>
+        <span>Checking live listings, verifying exact product matches, and reading platform reviews...</span>
+      </div>
+
+      <div id="compare-content" class="hidden">
+        <!-- Selected Product Banner -->
+        <div class="card product-hero" id="compare-hero"></div>
+
+        <!-- Platform Coverage / Anti-Bot Transparency Strip -->
+        <div class="card status-strip">
+          <div class="card-title-row">
+            <h3>Platform Availability &amp; Exact Match Check</h3>
+            <span id="compare-fetched-at" class="muted small"></span>
+          </div>
+          <div id="platform-status-list" class="status-pills"></div>
+        </div>
+
+        <!-- Price & Value Analysis Summary -->
+        <div class="analysis-section">
+          <div class="metrics-row" id="price-metrics-row"></div>
+
+          <div class="card verdict-card" id="verdict-card"></div>
+
+          <div class="card charts-card">
+            <h3>Price &amp; Overall Score Comparison</h3>
+            <div id="comparison-bars" class="bars-container"></div>
+          </div>
+        </div>
+
+        <!-- Side-by-side Store Comparison Cards -->
+        <div class="section-subheader">
+          <h2>Matched Platforms Side-by-Side</h2>
+          <span class="muted small">Only stores carrying this exact product are included</span>
+        </div>
+        <div id="offers-list" class="offers-grid"></div>
+
+        <!-- Optional Browser-Verified Quote Adder (for Anti-Bot Gated Stores like Amazon/Nykaa) -->
+        <details class="card custom-quote-card">
+          <summary>+ Optional: Add price/rating you checked on Amazon.in or Nykaa to recalculate analysis</summary>
+          <form id="custom-offer-form" class="custom-quote-form">
+            <select id="custom-platform" class="select-input">
+              <option value="Amazon India">Amazon India</option>
+              <option value="Nykaa">Nykaa</option>
+              <option value="Croma">Croma</option>
+              <option value="Tata CLiQ">Tata CLiQ</option>
+            </select>
+            <input type="number" id="custom-price" placeholder="Price (₹)" required min="1" />
+            <input type="number" id="custom-rating" placeholder="Rating (e.g. 4.4)" step="0.1" min="1" max="5" />
+            <input type="number" id="custom-rating-count" placeholder="Rating count" min="0" />
+            <input type="number" id="custom-delivery-days" placeholder="Delivery days (e.g. 2)" min="0" max="30" />
+            <input type="url" id="custom-url" placeholder="Product URL (optional)" />
+            <button type="submit" class="btn btn-primary">Include &amp; Re-Analyze</button>
+          </form>
+        </details>
+
+        <!-- Platform-Specific Product Reviews -->
+        <div class="card reviews-section">
+          <div class="card-title-row">
+            <div>
+              <h2>Verified Buyer Reviews (Product-Specific)</h2>
+              <p class="muted small">Showing only reviews from platforms that actually stock this exact product</p>
+            </div>
+            <div id="review-platform-tabs" class="tab-pills"></div>
+          </div>
+          <div id="review-sentiment-strip" class="sentiment-grid"></div>
+          <div id="reviews-container" class="reviews-grid"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Floating AI Customer Support Chatbot -->
+  <button id="chat-fab" class="chat-fab" aria-label="Open Customer Support AI Chat">
+    💬 AI Support
+  </button>
+
+  <aside id="chat-widget" class="chat-widget hidden" aria-label="Customer Support AI Chatbot">
+    <div class="chat-header">
+      <div>
+        <div class="chat-title">PricePulse AI Support</div>
+        <div class="chat-subtitle">Live product, review &amp; pricing help</div>
+      </div>
+      <div class="chat-header-actions">
+        <button id="chat-clear-btn" class="chat-icon-btn" title="Clear conversation">↺</button>
+        <button id="chat-close-btn" class="chat-icon-btn" title="Close chat">✕</button>
+      </div>
+    </div>
+
+    <div id="chat-messages" class="chat-messages"></div>
+
+    <div id="chat-suggestions" class="chat-suggestions"></div>
+
+    <form id="chat-form" class="chat-form">
+      <input
+        type="text"
+        id="chat-input"
+        placeholder="Ask about prices, reviews, delivery, or compare a product..."
+        autocomplete="off"
+      />
+      <button type="submit" class="btn btn-emerald">Send</button>
+    </form>
+  </aside>
+
+  <script src="/static/app.js"></script>
+  <script src="/static/chat.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,11 @@
+Live Working URL (Active Public HTTPS Tunnel):
+https://ba2aeb1568cd57.lhr.life
+
+Local URL:
+http://127.0.0.1:8085
+
+Note:
+The public HTTPS URL tunnels directly to the local PricePulse server running on port 8085.
+Keep the server and SSH tunnel running during live evaluation, or deploy the included
+render.yaml / Procfile / requirements.txt to Render or Railway for 24/7 cloud hosting.
+
